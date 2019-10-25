@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "pypeform"
+author = "Hendrik Verhoek"
+author-email = "whatever@0rig.in"
+home-page = "https://github.com/verhoek/pypeform"
+classifiers = ["License :: OSI Approved :: MIT License"]
+
