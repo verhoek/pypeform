@@ -1,7 +1,7 @@
 from .models import Answer, Field, ActionGraph, lookup
 
 
-def depth_first_search(field: Field):
+def _depth_first_search(field: Field):
     stack = [field]
 
     while stack:
@@ -41,10 +41,10 @@ def parse_fields(fields_raw: dict):
             num += 1
         else:
             index = f'statement-{num}'
-        depth_first_search(Field(f'{index}', **field_raw))
+        _depth_first_search(Field(f'{index}', **field_raw))
 
 
-def parse_logic(logic_raw: dict):
+def _parse_logic(logic_raw: dict):
     for logic in logic_raw:
         source_ref = logic['ref']
 
@@ -56,18 +56,19 @@ def parse_logic(logic_raw: dict):
 
             target_ref = action['details']['to']['value']
             condition = action['condition']
-            graph.add(source_ref, target_ref, condition)
+            yield source_ref, target_ref, condition
 
 
-def set_categories(category_data):
-    for field in lookup.values():
-        idx = field.get_main_idx()
-        for category in filter(lambda x: idx in category_data[x], category_data.keys()):
-            field.category = category
-            break
+def create_action_graph(logic: dict) -> ActionGraph:
+    graph = ActionGraph()
+
+    for source_ref, target_ref, condition in _parse_logic(logic):
+        graph.add(source_ref, target_ref, condition)
+
+    return graph
 
 
-def parse_answers(survey_response):
+def parse_answers(survey_response: dict):
     submitted_timestamp = survey_response['form_response']['submitted_at']
     answers = []
     for answer_raw in survey_response['form_response']['answers']:
@@ -76,4 +77,9 @@ def parse_answers(survey_response):
     return answers
 
 
-graph = ActionGraph()
+def set_categories(category_data):
+    for field in lookup.values():
+        idx = field.get_main_idx()
+        for category in filter(lambda x: idx in category_data[x], category_data.keys()):
+            field.category = category
+            break
