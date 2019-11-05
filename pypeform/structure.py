@@ -1,4 +1,5 @@
-from .models import Answer, Field, ActionGraph, lookup
+from .models import Answer, Field, ActionGraph
+from typing import List
 
 
 def _depth_first_search(field: Field):
@@ -43,6 +44,8 @@ def parse_fields(fields_raw: dict):
             index = f'statement-{num}'
         _depth_first_search(Field(f'{index}', **field_raw))
 
+    return Field.lookup
+
 
 def _parse_logic(logic_raw: dict):
     for logic in logic_raw:
@@ -77,8 +80,8 @@ def parse_answers(survey_response: dict):
     return answers
 
 
-def set_categories(category_data):
-    for field in lookup.values():
+def set_categories(category_data, fields: List[Field]):
+    for field in fields:
         idx = field.get_main_idx()
         for category in filter(lambda x: idx in category_data[x], category_data.keys()):
             field.category = category
