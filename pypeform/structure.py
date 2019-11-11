@@ -1,5 +1,5 @@
 from .models import Answer, Field, ActionGraph
-from typing import List
+from typing import List, Dict
 
 
 def _depth_first_search(field: Field):
@@ -80,9 +80,3 @@ def parse_form_response(form_response: dict):
     return answers
 
 
-def set_categories(category_data, fields: List[Field]):
-    for field in fields:
-        idx = field.get_main_idx()
-        for category in filter(lambda x: idx in category_data[x], category_data.keys()):
-            field.category = category
-            break

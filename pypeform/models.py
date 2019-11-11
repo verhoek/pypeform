@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 answers = []
 
@@ -34,6 +34,21 @@ class Field(object):
         :return:
         """
         return 'properties' in self.properties and 'fields' in self.properties['properties']
+
+    @classmethod
+    def set_categories(cls, category_data: Dict[str, List[str]]) -> None:
+        """
+        Set categories of all fields using a dictionary indexed by categories and values
+        a list of indices of associated fields.
+
+        :param category_data:
+        :return:
+        """
+        for field in cls.lookup.values():
+            idx = field.get_main_idx()
+            for category in filter(lambda x: idx in category_data[x], category_data.keys()):
+                field.category = category
+                break
 
     def __str__(self):
         return f'{self.index} ) {self.text} ({self.ref})'
