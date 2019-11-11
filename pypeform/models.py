@@ -1,13 +1,13 @@
 from collections import defaultdict
 from typing import Dict, Any
 
-_ref_index = {}
 answers = []
 
 
 class Field(object):
 
     lookup: Dict[str, Any] = {}
+    ref_index = {}
 
     def __init__(self, index, **kwargs):
         self.ref = kwargs['ref']
@@ -22,7 +22,7 @@ class Field(object):
 
         # within a field group, knowing the next sibling is relevant information
         self.next_within_group = None
-        _ref_index[self.ref] = self
+        Field.ref_index[self.ref] = self
         Field.lookup[self.index] = self
 
     def get_main_idx(self):
@@ -42,7 +42,7 @@ class Field(object):
 class Answer(object):
     def __init__(self, **kwargs):
         self._ref = kwargs['field']['ref']
-        self.field = _ref_index[self._ref]
+        self.field = Field.ref_index[self._ref]
         self.field.answer = self
         self.type = kwargs['type']
 
@@ -54,7 +54,6 @@ class Answer(object):
             self.response = kwargs[self.type]
 
         answers.append(self)
-
 
 
 class Action(object):
@@ -70,7 +69,7 @@ class ActionGraph(object):
         self._map = defaultdict(list)
 
     def add(self, source_ref, target_ref, condition):
-        source_idx = _ref_index[source_ref].index
+        source_idx = Field.ref_index[source_ref].index
         self._map[source_idx].append(Action(source_ref, target_ref, condition))
 
     def peers(self, field: Field, with_children=False):
@@ -91,7 +90,7 @@ class ActionGraph(object):
                 peers.append(popped_field)
 
             for action in filter(lambda x: x.relevant, self._map[popped_field.index]):
-                field = _ref_index[action.target]
+                field = Field.ref_index[action.target]
                 stack.append(field)
 
             if popped_field.next_within_group:
@@ -103,6 +102,6 @@ class ActionGraph(object):
             for field in popped_field.children:
                 stack.append(field)
                 for action in filter(lambda x: x.relevant, self._map[field.index]):
-                    stack.append(_ref_index[action.target])
+                    stack.append(Field.ref_index[action.target])
 
         return peers
