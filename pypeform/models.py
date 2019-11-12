@@ -8,6 +8,7 @@ class Field(object):
 
     lookup: Dict[str, Any] = {}
     ref_index = {}
+    counter = 1
 
     def __init__(self, index, **kwargs):
         self.ref = kwargs['ref']
@@ -15,6 +16,8 @@ class Field(object):
         self.type = kwargs['type']
         self.index = index
         self.properties = kwargs
+        self.id = Field.counter
+        Field.counter += 1
 
         self.category = None
         self.answer = None
@@ -24,6 +27,7 @@ class Field(object):
         self.next_within_group = None
         Field.ref_index[self.ref] = self
         Field.lookup[self.index] = self
+
 
     def get_main_idx(self):
         return self.index.split('.')[0] if '.' in self.index else self.index
@@ -90,7 +94,7 @@ class ActionGraph(object):
     def peers(self, field: Field, with_children=False):
         relevant_actions = filter(lambda x: x.relevant, self._map[field.index])
 
-        return ','.join([peer.index for peer in self._get_all_children(field, with_children)])
+        return [peer for peer in self._get_all_children(field, with_children)]
 
     def _get_all_children(self, field, with_children=False):
 
