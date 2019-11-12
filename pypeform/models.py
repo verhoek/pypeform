@@ -91,18 +91,18 @@ class ActionGraph(object):
         source_idx = Field.ref_index[source_ref].index
         self._map[source_idx].append(Action(source_ref, target_ref, condition))
 
-    def peers(self, field: Field, with_children=False):
+    def peers(self, field: Field, limit=-1, with_children=False):
         relevant_actions = filter(lambda x: x.relevant, self._map[field.index])
 
-        return [peer for peer in self._get_all_children(field, with_children)]
+        return self._get_all_children(field, limit, with_children)
 
-    def _get_all_children(self, field, with_children=False):
+    def _get_all_children(self, field, limit, with_children):
 
         peers = []
 
         stack = [field]
 
-        while stack:
+        while stack and (len(stack) < limit or limit == -1):
             popped_field = stack.pop()
 
             if popped_field.index != field.index and popped_field not in peers:
