@@ -72,7 +72,7 @@ def create_action_graph(logic: dict) -> ActionGraph:
 
 
 def parse_form_response(form_response: dict):
-    submitted_timestamp = form_response['form_response']['submitted_at']
+    Answer.submitted_timestamp = form_response['form_response']['submitted_at']
     answers = []
     for answer_raw in form_response['form_response']['answers']:
         answers.append(Answer(**answer_raw))

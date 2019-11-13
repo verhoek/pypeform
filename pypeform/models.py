@@ -59,6 +59,9 @@ class Field(object):
 
 
 class Answer(object):
+
+    submitted_timestamp = None
+
     def __init__(self, **kwargs):
         self._ref = kwargs['field']['ref']
         self.field = Field.ref_index[self._ref]
