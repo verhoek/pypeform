@@ -19,6 +19,7 @@ class Field(object):
 
         self.category = None
         self.answer = None
+        self.graph = None
         self.children = []
 
         # within a field group, knowing the next sibling is relevant information
@@ -50,6 +51,7 @@ class Field(object):
             for category in filter(lambda x: parent_index in x['ids'], category_data):
                 field.category = category['name']
                 field.color = category['color']
+                field.graph = category['graph'] if 'graph' in category else True
                 break
 
     def __str__(self):
@@ -106,6 +108,9 @@ class ActionGraph(object):
 
         while stack and (len(stack) < limit or limit == -1):
             popped_field = stack.pop()
+
+            if not popped_field.graph:
+                continue
 
             if popped_field.index != field.index and popped_field not in peers:
                 peers.append(popped_field)
