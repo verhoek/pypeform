@@ -20,6 +20,8 @@ class Field(object):
         self.category = None
         self.answer = None
         self.graph = None
+        self.category_id = None
+
         self.children = []
 
         # within a field group, knowing the next sibling is relevant information
@@ -50,7 +52,8 @@ class Field(object):
             parent_index = field.get_parent_index()
             for category in filter(lambda x: parent_index in x['ids'], category_data):
                 field.category = category['name']
-                field.color = category['color']
+                field.category_id = category['id']
+                field.color = category['color'] if 'color' in category else None
                 field.graph = category['graph'] if 'graph' in category else True
                 break
 
