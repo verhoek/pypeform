@@ -1,4 +1,4 @@
-from .models import Answer, Field, ActionGraph
+from .models import Answer, Field, ActionGraph, Category, Condition
 from typing import List, Dict
 
 
@@ -59,11 +59,37 @@ def _parse_logic(logic_raw: dict):
             yield source_ref, target_ref, condition
 
 
+def parse_categories(category_data):
+    for category_info in category_data:
+        category = Category()
+        category.name = category_info['name']
+        category.id = category_info['id']
+        category.ids = category_info['ids']
+        category.color = category_info['color'] if 'color' in category_info else None
+        category.graph = category_info['graph'] if 'graph' in category_info else True
+        category.update_fields()
+
+
 def create_action_graph(logic: dict) -> ActionGraph:
     graph = ActionGraph()
 
+    for field in Field.lookup.values():
+        category = field.category
+
+        if not category:
+            continue
+
+        n = len(category.ids)
+        i = category.ids.index(field.get_parent_index())
+
+        # # no circular references
+        # if i == n-1:
+        #     continue
+
+        graph.add_by_index(field.index, category.ids[(i + 1) % n], Condition(None, 'category'))
+
     for source_ref, target_ref, condition in _parse_logic(logic):
-        graph.add(source_ref, target_ref, condition)
+        graph.add_by_ref(source_ref, target_ref, Condition(condition['op'], None))
 
     return graph
 

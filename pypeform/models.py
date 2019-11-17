@@ -2,6 +2,28 @@ from collections import defaultdict
 from typing import Dict, Any, List
 
 
+class Category(object):
+
+    categories = []
+
+    def __init__(self):
+        self.ids : List = None
+        Category.categories.append(self)
+
+    def update_fields(self) -> None:
+        """
+        Set categories of all fields using a dictionary indexed by categories and values
+        a list of indices of associated fields.
+
+        :param category_data:
+        :return:
+        """
+        for field in Field.lookup.values():
+            if not field.get_parent_index() in self.ids:
+                continue
+            field.category = self
+
+
 class Field(object):
 
     lookup: Dict[str, Any] = {}
@@ -19,9 +41,6 @@ class Field(object):
 
         self.category = None
         self.answer = None
-        self.graph = None
-        self.category_id = None
-
         self.children = []
 
         # within a field group, knowing the next sibling is relevant information
@@ -38,24 +57,6 @@ class Field(object):
         :return:
         """
         return 'properties' in self.properties and 'fields' in self.properties['properties']
-
-    @classmethod
-    def set_categories(cls, category_data: List[Dict[str, Any]]) -> None:
-        """
-        Set categories of all fields using a dictionary indexed by categories and values
-        a list of indices of associated fields.
-
-        :param category_data:
-        :return:
-        """
-        for field in cls.lookup.values():
-            parent_index = field.get_parent_index()
-            for category in filter(lambda x: parent_index in x['ids'], category_data):
-                field.category = category['name']
-                field.category_id = category['id']
-                field.color = category['color'] if 'color' in category else None
-                field.graph = category['graph'] if 'graph' in category else True
-                break
 
     def __str__(self):
         return f'{self.index} ) {self.text} ({self.ref})'
@@ -82,43 +83,53 @@ class Answer(object):
         Answer.answers.append(self)
 
 
+class Condition(object):
+    def __init__(self, op, name):
+        self.op = op
+        self.name = name
+
+
 class Action(object):
     def __init__(self, source, target, condition):
         self.source = source
         self.target = target
         self.condition = condition
-        self.relevant = condition['op'] != 'always'
+        self.not_always = condition.op != 'always'
+        self.in_category = condition.name == 'category'
 
 
 class ActionGraph(object):
     def __init__(self):
-        self._map = defaultdict(list)
+        self.map = defaultdict(list)
 
-    def add(self, source_ref, target_ref, condition):
-        source_idx = Field.ref_index[source_ref].index
-        self._map[source_idx].append(Action(source_ref, target_ref, condition))
+    def add_by_ref(self, source_ref, target_ref, condition):
+        self.map[source_ref].append(Action(source_ref, target_ref, condition))
+
+    def add_by_index(self, source_idx, target_idx, condition):
+        source_ref = Field.lookup[source_idx].ref
+        target_ref = Field.lookup[target_idx].ref
+        self.add_by_ref(source_ref, target_ref, condition)
 
     def peers(self, field: Field, limit=-1, with_children=False):
-        relevant_actions = filter(lambda x: x.relevant, self._map[field.index])
 
         return self._get_all_children(field, limit, with_children)
 
-    def _get_all_children(self, field, limit, with_children):
+    def _get_all_children(self, root_field, limit, with_children):
 
         peers = []
 
-        stack = [field]
+        stack = [root_field]
 
         while stack and (len(stack) < limit or limit == -1):
             popped_field = stack.pop()
 
-            if not popped_field.graph:
+            if not popped_field.category or not popped_field.category.graph:
                 continue
 
-            if popped_field.index != field.index and popped_field not in peers:
+            if popped_field.index != root_field.index and popped_field not in peers:
                 peers.append(popped_field)
 
-            for action in filter(lambda x: x.relevant, self._map[popped_field.index]):
+            for action in filter(lambda x: x.not_always, self.map[popped_field.ref]):
                 field = Field.ref_index[action.target]
                 stack.append(field)
 
@@ -130,7 +141,7 @@ class ActionGraph(object):
 
             for field in popped_field.children:
                 stack.append(field)
-                for action in filter(lambda x: x.relevant, self._map[field.index]):
+                for action in filter(lambda x: x.not_always, self.map[field.ref]):
                     stack.append(Field.ref_index[action.target])
 
         return peers
