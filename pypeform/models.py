@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 class Field(object):
@@ -26,7 +26,7 @@ class Field(object):
         Field.ref_index[self.ref] = self
         Field.lookup[self.index] = self
 
-    def get_main_idx(self):
+    def get_parent_index(self):
         return self.index.split('.')[0] if '.' in self.index else self.index
 
     def has_sub_fields(self):
@@ -37,7 +37,7 @@ class Field(object):
         return 'properties' in self.properties and 'fields' in self.properties['properties']
 
     @classmethod
-    def set_categories(cls, category_data) -> None:
+    def set_categories(cls, category_data: List[Dict[str, Any]]) -> None:
         """
         Set categories of all fields using a dictionary indexed by categories and values
         a list of indices of associated fields.
@@ -46,10 +46,10 @@ class Field(object):
         :return:
         """
         for field in cls.lookup.values():
-            idx = field.get_main_idx()
-            for category in filter(lambda x: idx in category_data.ids, category_data):
-                field.category = category.name
-                field.color = category.color
+            parent_index = field.get_parent_index()
+            for category in filter(lambda x: parent_index in x['ids'], category_data):
+                field.category = category['name']
+                field.color = category['color']
                 break
 
     def __str__(self):
