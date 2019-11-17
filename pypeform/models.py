@@ -1,7 +1,5 @@
 from collections import defaultdict
-from typing import Dict, Any, List
-
-answers = []
+from typing import Dict, Any
 
 
 class Field(object):
@@ -28,7 +26,6 @@ class Field(object):
         Field.ref_index[self.ref] = self
         Field.lookup[self.index] = self
 
-
     def get_main_idx(self):
         return self.index.split('.')[0] if '.' in self.index else self.index
 
@@ -40,7 +37,7 @@ class Field(object):
         return 'properties' in self.properties and 'fields' in self.properties['properties']
 
     @classmethod
-    def set_categories(cls, category_data: Dict[str, List[str]]) -> None:
+    def set_categories(cls, category_data) -> None:
         """
         Set categories of all fields using a dictionary indexed by categories and values
         a list of indices of associated fields.
@@ -50,8 +47,9 @@ class Field(object):
         """
         for field in cls.lookup.values():
             idx = field.get_main_idx()
-            for category in filter(lambda x: idx in category_data[x], category_data.keys()):
-                field.category = category
+            for category in filter(lambda x: idx in category_data.ids, category_data):
+                field.category = category.name
+                field.color = category.color
                 break
 
     def __str__(self):
@@ -59,6 +57,7 @@ class Field(object):
 
 
 class Answer(object):
+    answers = []
 
     submitted_timestamp = None
 
@@ -75,7 +74,7 @@ class Answer(object):
         else:
             self.response = kwargs[self.type]
 
-        answers.append(self)
+        Answer.answers.append(self)
 
 
 class Action(object):
