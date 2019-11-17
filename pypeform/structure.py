@@ -8,8 +8,6 @@ def _depth_first_search(field: Field):
     while stack:
         field = stack.pop()
 
-        print(field)
-
         if not field.has_sub_fields():
             continue
 
@@ -17,14 +15,13 @@ def _depth_first_search(field: Field):
 
         prev_field = None
         for sub_field_raw in field.properties['properties']['fields']:
+            index_letter = chr(ord('a') + num)
             if sub_field_raw['type'] != 'statement':
-                index = f'{chr(97 + num)}'
                 num += 1
             else:
-                # usually this does not occur
-                index = f'statement-{chr(97 + num)}'
+                index_letter = f'statement-{index_letter}'
 
-            sub_field = Field(f'{field.index}.{index}', **sub_field_raw)
+            sub_field = Field(f'{field.index}.{index_letter}', **sub_field_raw)
 
             if prev_field:
                 prev_field.next_within_group = sub_field
