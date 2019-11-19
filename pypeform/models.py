@@ -58,6 +58,9 @@ class Field(object):
         """
         return 'properties' in self.properties and 'fields' in self.properties['properties']
 
+    def get_sub_fields(self):
+        return self.properties['properties']['fields']
+
     def __str__(self):
         return f'{self.index} ) {self.text} ({self.ref})'
 
@@ -90,6 +93,8 @@ class Condition(object):
 
 
 class Action(object):
+    _actions = defaultdict(list)
+
     def __init__(self, source, target, condition):
         self.source = source
         self.target = target
@@ -97,6 +102,11 @@ class Action(object):
         self.not_always = condition.op != 'always'
         self.in_category = condition.name == 'category'
 
+        Action._actions[source].append(self)
+
+    @staticmethod
+    def get_actions():
+        return Action._actions.values()
 
 class ActionGraph(object):
     def __init__(self):

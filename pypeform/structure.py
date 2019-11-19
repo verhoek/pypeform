@@ -14,7 +14,8 @@ def _depth_first_search(field: Field):
         num = 0
 
         prev_field = None
-        for sub_field_raw in field.properties['properties']['fields']:
+        # within group
+        for sub_field_raw in field.get_sub_fields():
             index_letter = chr(ord('a') + num)
             if sub_field_raw['type'] != 'statement':
                 num += 1
