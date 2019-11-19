@@ -106,7 +106,9 @@ class Action(object):
 
     @staticmethod
     def get_actions():
-        return Action._actions.values()
+        for actions in Action._actions.values():
+            for action in actions:
+                yield action
 
 class ActionGraph(object):
     def __init__(self):
