@@ -110,50 +110,51 @@ class Action(object):
             for action in actions:
                 yield action
 
-class ActionGraph(object):
-    def __init__(self):
-        self.map = defaultdict(list)
-
-    def add_by_ref(self, source_ref, target_ref, condition):
-        self.map[source_ref].append(Action(source_ref, target_ref, condition))
-
-    def add_by_index(self, source_idx, target_idx, condition):
-        source_ref = Field.lookup[source_idx].ref
-        target_ref = Field.lookup[target_idx].ref
-        self.add_by_ref(source_ref, target_ref, condition)
-
-    def peers(self, field: Field, limit=-1, with_children=False):
-
-        return self._get_all_children(field, limit, with_children)
-
-    def _get_all_children(self, root_field, limit, with_children):
-
-        peers = []
-
-        stack = [root_field]
-
-        while stack and (len(stack) < limit or limit == -1):
-            popped_field = stack.pop()
-
-            if not popped_field.category or not popped_field.category.graph:
-                continue
-
-            if popped_field.index != root_field.index and popped_field not in peers:
-                peers.append(popped_field)
-
-            for action in filter(lambda x: x.not_always, self.map[popped_field.ref]):
-                field = Field.ref_index[action.target]
-                stack.append(field)
-
-            if popped_field.next_within_group:
-                stack.append(popped_field.next_within_group)
-
-            if not with_children:
-                continue
-
-            for field in popped_field.children:
-                stack.append(field)
-                for action in filter(lambda x: x.not_always, self.map[field.ref]):
-                    stack.append(Field.ref_index[action.target])
-
-        return peers
+#
+# class ActionGraph(object):
+#     def __init__(self):
+#         self.map = defaultdict(list)
+#
+#     def add_by_ref(self, source_ref, target_ref, condition):
+#         self.map[source_ref].append(Action(source_ref, target_ref, condition))
+#
+#     def add_by_index(self, source_idx, target_idx, condition):
+#         source_ref = Field.lookup[source_idx].ref
+#         target_ref = Field.lookup[target_idx].ref
+#         self.add_by_ref(source_ref, target_ref, condition)
+#
+#     def peers(self, field: Field, limit=-1, with_children=False):
+#
+#         return self._get_all_children(field, limit, with_children)
+#
+#     def _get_all_children(self, root_field, limit, with_children):
+#
+#         peers = []
+#
+#         stack = [root_field]
+#
+#         while stack and (len(stack) < limit or limit == -1):
+#             popped_field = stack.pop()
+#
+#             if not popped_field.category or not popped_field.category.graph:
+#                 continue
+#
+#             if popped_field.index != root_field.index and popped_field not in peers:
+#                 peers.append(popped_field)
+#
+#             for action in filter(lambda x: x.not_always, self.map[popped_field.ref]):
+#                 field = Field.ref_index[action.target]
+#                 stack.append(field)
+#
+#             if popped_field.next_within_group:
+#                 stack.append(popped_field.next_within_group)
+#
+#             if not with_children:
+#                 continue
+#
+#             for field in popped_field.children:
+#                 stack.append(field)
+#                 for action in filter(lambda x: x.not_always, self.map[field.ref]):
+#                     stack.append(Field.ref_index[action.target])
+#
+#         return peers

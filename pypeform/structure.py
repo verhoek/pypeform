@@ -1,4 +1,4 @@
-from .models import Answer, Field, ActionGraph, Category, Condition
+from .models import Answer, Field, Category, Condition, Action
 from typing import List, Dict
 
 
@@ -71,8 +71,7 @@ def parse_categories(category_data):
         category.update_fields()
 
 
-def create_action_graph(logic: dict) -> ActionGraph:
-    graph = ActionGraph()
+def parse_actions(logic: dict) -> None:
 
     for field in Field.lookup.values():
         category = field.category
@@ -83,16 +82,16 @@ def create_action_graph(logic: dict) -> ActionGraph:
         n = len(category.ids)
         i = category.ids.index(field.get_parent_index())
 
-        # # no circular references
-        # if i == n-1:
-        #     continue
+        # no circular references
+        if i == n-1:
+            continue
 
-        graph.add_by_index(field.index, category.ids[(i + 1) % n], Condition(None, 'category'))
+        target_idx = category.ids[(i + 1) % n]
+        target_ref = Field.lookup[target_idx].ref
+        Action(field.ref, target_ref, Condition(None, 'category'))
 
     for source_ref, target_ref, condition in _parse_logic(logic):
-        graph.add_by_ref(source_ref, target_ref, Condition(condition['op'], None))
-
-    return graph
+        Action(source_ref, target_ref, Condition(condition['op'], None))
 
 
 def parse_form_response(form_response: dict):
