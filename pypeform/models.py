@@ -3,11 +3,10 @@ from typing import Dict, Any, List
 
 
 class Category(object):
-
     categories = []
 
     def __init__(self):
-        self.ids : List = None
+        self.ids: List = None
         Category.categories.append(self)
 
     def update_fields(self) -> None:
@@ -24,8 +23,13 @@ class Category(object):
             field.category = self
 
 
-class Field(object):
+class FieldConfig(object):
+    def __init__(self):
+        self.important = None
 
+
+# aggregate
+class Field(object):
     lookup: Dict[str, Any] = {}
     ref_index = {}
     counter = 1
@@ -40,6 +44,7 @@ class Field(object):
         Field.counter += 1
 
         self.category = None
+        self.config = None
         self.answer = None
         self.children = []
 

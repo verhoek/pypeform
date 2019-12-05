@@ -1,4 +1,4 @@
-from .models import Answer, Field, Category, Condition, Action
+from .models import Answer, Field, Category, Condition, Action, FieldConfig
 from typing import List, Dict
 
 
@@ -102,4 +102,16 @@ def parse_form_response(form_response: dict):
 
     return answers
 
+
+def parse_field_config(field_config_data):
+    for config in field_config_data:
+
+        field_id = config['selector']['field_id']
+        field = Field.lookup[field_id]
+        if 'response' in config['selector']:
+            if not field.answer or field.answer.response != config['selector']['response']:
+                continue
+
+        field.config = FieldConfig()
+        field.config.important = True
 
