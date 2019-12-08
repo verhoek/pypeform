@@ -112,5 +112,5 @@ def parse_field_config(field_config_data):
                 continue
 
         field.config = FieldConfig()
-        field.config.important = config.get('important', False)
+        field.config.size = config.get('size', None)
         field.config.color = config.get('color', None)
