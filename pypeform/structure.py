@@ -72,7 +72,6 @@ def parse_categories(category_data):
 
 
 def parse_actions(logic: dict) -> None:
-
     for field in Field.lookup.values():
         category = field.category
 
@@ -83,7 +82,7 @@ def parse_actions(logic: dict) -> None:
         i = category.ids.index(field.get_parent_index())
 
         # no circular references
-        if i == n-1:
+        if i == n - 1:
             continue
 
         target_idx = category.ids[(i + 1) % n]
@@ -113,5 +112,5 @@ def parse_field_config(field_config_data):
                 continue
 
         field.config = FieldConfig()
-        field.config.important = True
-
+        field.config.important = config.get('important', False)
+        field.config.color = config.get('color', None)
