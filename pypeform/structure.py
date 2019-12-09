@@ -103,12 +103,42 @@ def parse_form_response(form_response: dict):
 
 
 def parse_field_config(field_config_data):
+    """
+
+
+    :param field_config_data:
+
+    an array of the objects, where objects are like
+    {
+      "selector": {
+        "field_id": "2",
+        "response": {
+          "type": "exact",
+          "value": "some value"
+        }
+      },
+      "size": 100
+    }
+    :return:
+    """
     for config in field_config_data:
 
         field_id = config['selector']['field_id']
-        field = Field.lookup[field_id]
+        field = Field.lookup.get(field_id, None)
+
+        if not field:
+            continue
+
         if 'response' in config['selector']:
-            if not field.answer or field.answer.response != config['selector']['response']:
+            if not field.answer:
+                continue
+
+            if (config['selector']['response']['type'] == "exact" and
+                    field.answer.response != config['selector']['response']['value']):
+                continue
+
+            if (config['selector']['response']['type'] == "pattern" and
+                    config['selector']['response']['value']) != "*":
                 continue
 
         field.config = FieldConfig()
