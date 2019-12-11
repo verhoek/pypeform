@@ -6,7 +6,7 @@ class Category(object):
     categories = []
 
     def __init__(self):
-        self.ids: List = None
+        self.field_ids: List = None
         Category.categories.append(self)
 
     def update_fields(self) -> None:
@@ -18,7 +18,7 @@ class Category(object):
         :return:
         """
         for field in Field.lookup.values():
-            if not field.get_parent_index() in self.ids:
+            if not field.get_parent_index() in self.field_ids:
                 continue
             field.category = self
 

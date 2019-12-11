@@ -65,27 +65,29 @@ def parse_categories(category_data):
         category = Category()
         category.name = category_info['name']
         category.id = category_info['id']
-        category.ids = category_info['ids']
+        category.field_ids = category_info['field_ids']
         category.color = category_info['color'] if 'color' in category_info else None
         category.graph = category_info['graph'] if 'graph' in category_info else True
         category.update_fields()
 
 
 def parse_actions(logic: dict) -> None:
+
+    # chain following questions within a category to a link
     for field in Field.lookup.values():
         category = field.category
 
         if not category:
             continue
 
-        n = len(category.ids)
-        i = category.ids.index(field.get_parent_index())
+        n = len(category.field_ids)
+        i = category.field_ids.index(field.get_parent_index())
 
         # no circular references
         if i == n - 1:
             continue
 
-        target_idx = category.ids[(i + 1) % n]
+        target_idx = category.field_ids[(i + 1) % n]
         target_ref = Field.lookup[target_idx].ref
         Action(field.ref, target_ref, Condition(None, 'category'))
 
