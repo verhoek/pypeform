@@ -84,7 +84,8 @@ class Answer(object):
         if self.type == 'choice':
             self.response = kwargs[self.type]['label']
         elif self.type == 'choices':
-            self.response = ','.join(kwargs[self.type]['labels'])
+            labels = kwargs[self.type]['labels']
+            self.response = ','.join(labels) if labels else None
         else:
             self.response = kwargs[self.type]
 
