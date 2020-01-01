@@ -72,7 +72,6 @@ def parse_categories(category_data):
 
 
 def parse_actions(logic: dict) -> None:
-
     # chain following questions within a category to a link
     for field in Field.lookup.values():
         category = field.category
@@ -106,8 +105,6 @@ def parse_form_response(form_response: dict):
 
 def parse_field_config(field_config_data):
     """
-
-
     :param field_config_data:
 
     an array of the objects, where objects are like
@@ -125,28 +122,34 @@ def parse_field_config(field_config_data):
     """
     for config in field_config_data:
 
-        field_id = config['selector']['field_id']
-        field = Field.lookup.get(field_id, None)
+        field_id = config['selector'].get('field_id')
+        if field_id:
+            field_ids = [field_id]
+        else:
+            field_ids = config['selector'].get('field_ids')
 
-        if not field:
-            continue
+        for field_id in field_ids:
+            field = Field.lookup.get(field_id, None)
 
-        if 'response' in config['selector']:
-            if not field.answer:
+            if not field:
                 continue
 
-            if (config['selector']['response']['type'] == "exact" and
-                    field.answer.response != config['selector']['response']['value']):
-                continue
+            if 'response' in config['selector']:
+                if not field.answer:
+                    continue
 
-            if (config['selector']['response']['type'] == "pattern" and
+                if (config['selector']['response']['type'] == "exact" and
+                        field.answer.response != config['selector']['response']['value']):
+                    continue
+
+                if (config['selector']['response']['type'] == "pattern" and
                     config['selector']['response']['value']) != "*":
-                continue
+                    continue
 
-            if (config['selector']['response']['type'] == "not" and
+                if (config['selector']['response']['type'] == "not" and
                     config['selector']['response']['value']) == field.answer.response:
-                continue
+                    continue
 
-        field.config = FieldConfig()
-        field.config.size = config.get('size', None)
-        field.config.color = config.get('color', None)
+            field.config = FieldConfig()
+            field.config.size = config.get('size', None)
+            field.config.color = config.get('color', None)
