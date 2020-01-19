@@ -2,7 +2,7 @@
 This is the documentation for the package.
 """
 
-__version__ = '0.0.39'
+__version__ = '0.0.41'
 
 
 from . import structure

@@ -138,9 +138,14 @@ def parse_field_config(field_config_data):
                 if not field.answer:
                     continue
 
-                if (config['selector']['response']['type'] == "exact" and
-                        field.answer.response != config['selector']['response']['value']):
-                    continue
+                if config['selector']['response']['type'] == "exact":
+                    x = field.answer.response
+                    y = config['selector']['response']['value']
+                    if isinstance(x, str) and isinstance(y, str):
+                        if x.lower() != y.lower():
+                            continue
+                    elif x != y:
+                        continue
 
                 if (config['selector']['response']['type'] == "pattern" and
                     config['selector']['response']['value']) != "*":
