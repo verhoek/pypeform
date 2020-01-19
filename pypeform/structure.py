@@ -148,11 +148,11 @@ def parse_field_config(field_config_data):
                         continue
 
                 if (config['selector']['response']['type'] == "pattern" and
-                    config['selector']['response']['value']) != "*":
+                    config['selector']['response']['value'] != "*"):
                     continue
 
                 if (config['selector']['response']['type'] == "not" and
-                    config['selector']['response']['value']) == field.answer.response:
+                    config['selector']['response']['value'] == field.answer.response):
                     continue
 
             field.config = FieldConfig()
